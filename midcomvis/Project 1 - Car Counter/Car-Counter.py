@@ -8,6 +8,8 @@ import torch
 
 cap = cv2.VideoCapture("../yolobasics/images/v5.mp4")
 
+maskImg = cv2.imread("mask.png")
+mask = cv2.resize(maskImg,(800,470))
 
 classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", 
               "truck", "boat", "traffic light", "fire hydrant", "stop sign", 
@@ -23,13 +25,14 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
               "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = YOLO("./yolov8l.pt")
+model = YOLO("../midcomvis/YOLO-Weights/yolov8n.pt")
 model.to(device)
 # model.train(data="coco8.yaml",epochs=100,imgsz=640,device=0)
 
 while True:
     success , img = cap.read()
     img = cv2.resize(img,(800,470))
+    imgRegion = cv2.bitwise_and(img,mask)
     results = model(img,stream=True)
 
     for r in results:
@@ -54,4 +57,5 @@ while True:
                 cvzone.cornerRect(img,(x1,y1,w,h),l=9)
 
     cv2.imshow("Image",img)
+    cv2.imshow("ImageRegion",imgRegion)
     cv2.waitKey(1)
